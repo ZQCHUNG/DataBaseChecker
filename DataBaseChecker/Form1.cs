@@ -144,6 +144,8 @@ namespace DataBaseChecker
 
                     DataTable dt_TableSchema = new DataTable();
 
+                    DataTable dt_data = new DataTable();
+
                     string tableName = dt_TableName.Rows[i]["TABLE_NAME"].ToString();
 
                     //存放檔案
@@ -161,7 +163,7 @@ namespace DataBaseChecker
 
                         sw.WriteLine("欄位數量::" + dt_TableSchema.Rows.Count);
 
-                        dt_TablePK  = DBManager.ConnDB(ConnString, SQLManager.Select.GetTablePK(tableName));
+                        dt_TablePK = DBManager.ConnDB(ConnString, SQLManager.Select.GetTablePK(tableName));
 
                         if (dt_TablePK.Rows.Count == 0)
                         {
@@ -182,6 +184,28 @@ namespace DataBaseChecker
                                 string columnName = dt_TableSchema.Columns[k].ColumnName;
 
                                 sw.WriteLine(string.Format("{0}:{1}", columnName, dt_TableSchema.Rows[j][k].ToString()));
+                            }
+
+                            sw.WriteLine();
+                        }
+
+                        //若要記錄資料
+                        if (chkListTableDataChecker.GetItemChecked(i))
+                        {
+                            sw.WriteLine("==Data==");
+
+                            dt_data = DBManager.ConnDB(ConnString, SQLManager.Select.GetTableData(tableName));
+
+                            for (int j = 0; j < dt_data.Rows.Count; j++)
+                            {
+                                for (int k = 0; k < dt_data.Columns.Count; k++)
+                                {
+                                    string columnName = dt_data.Columns[k].ColumnName;
+
+                                    sw.WriteLine(string.Format("{0}:{1}", columnName, dt_data.Rows[j][k].ToString()));
+                                }
+
+                                sw.WriteLine();
                             }
                         }
                     }

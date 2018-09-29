@@ -34,6 +34,14 @@ namespace DataBaseChecker.Class
             {
                 return string.Format("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '{0}'",TableName);
             }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public static string GetTableData(string TableName)
+            {
+                return string.Format("SELECT * FROM {0} ", TableName);
+            }
         }
     }
 }
