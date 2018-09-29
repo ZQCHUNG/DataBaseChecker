@@ -269,6 +269,8 @@ namespace DataBaseChecker
 
             string impactFilePath = "diffFile.txt";
 
+            string recorderDirPath = RecorderDir;
+
             try
             {
                 for (int i = 0; i < chkListDir.Items.Count; i++)
@@ -295,16 +297,16 @@ namespace DataBaseChecker
                             ConnString = sr.ReadLine();
                         }
 
-                        RecorderDir = Path.Combine(RecorderDir, dirName);
+                        recorderDirPath = Path.Combine(recorderDirPath, dirName);
 
-                        var dir = (from d in new System.IO.DirectoryInfo(RecorderDir).GetDirectories()
+                        var dir = (from d in new System.IO.DirectoryInfo(recorderDirPath).GetDirectories()
                                    select d).ToList().OrderByDescending(d => d.CreationTime).Take(1).SingleOrDefault();
 
                         while (dir != null)
                         {
-                            RecorderDir = Path.Combine(RecorderDir, dir.Name);
+                            recorderDirPath = Path.Combine(recorderDirPath, dir.Name);
 
-                            dir = (from d in new System.IO.DirectoryInfo(RecorderDir).GetDirectories()
+                            dir = (from d in new System.IO.DirectoryInfo(recorderDirPath).GetDirectories()
                                    select d).ToList().OrderByDescending(d => d.CreationTime).Take(1).SingleOrDefault();
                         }
 
@@ -312,7 +314,7 @@ namespace DataBaseChecker
 
                         CreateFile(impactFilePath);
 
-                        Logger.Info("比對位置::" + RecorderDir);
+                        Logger.Info("比對位置::" + recorderDirPath);
 
                         dt_TableName = DBManager.ConnDB(ConnString, SQLManager.Select.GetAllTableName());
 
@@ -326,11 +328,11 @@ namespace DataBaseChecker
                             //目前檔案名稱
                             List<string> currentTableName = new List<string>();
 
-                            string[] tmp_files = System.IO.Directory.GetFiles(RecorderDir);
+                            string[] tmp_files = System.IO.Directory.GetFiles(recorderDirPath);
 
                             foreach (var o in tmp_files)
                             {
-                                oldTableName.Add(o.Replace(RecorderDir + "\\", "").Replace(".txt", ""));
+                                oldTableName.Add(o.Replace(recorderDirPath + "\\", "").Replace(".txt", ""));
                             }
 
                             for (int j = 0; j < dt_TableName.Rows.Count; j++)
@@ -369,7 +371,7 @@ namespace DataBaseChecker
                                 DataTable dt_data = new DataTable();
 
 
-                                using (StreamReader sr = new StreamReader(Path.Combine(RecorderDir, tableName + ".txt")))
+                                using (StreamReader sr = new StreamReader(Path.Combine(recorderDirPath, tableName + ".txt")))
                                 {
                                     sw.WriteLine();
 
@@ -484,6 +486,7 @@ namespace DataBaseChecker
 
                                     var intersectSchema = currentScahema.Intersect(oldSchema_SearchKey);
 
+
                                     for (int j = 0; j < dt_TableSchema.Rows.Count; j++)
                                     {
                                         if (intersectSchema.Contains(dt_TableSchema.Rows[j]["COLUMN_NAME"]))
@@ -506,6 +509,90 @@ namespace DataBaseChecker
                                             {
                                                 sw.WriteLine("CHARACTER_MAXIMUM_LENGTH已變更::" + targetSchrma.CHARACTER_MAXIMUM_LENGTH + "==>" + dt_TableSchema.Rows[j]["CHARACTER_MAXIMUM_LENGTH"].ToString());
                                             }
+                                        }
+                                    }
+
+                                    #endregion
+
+                                    #region 資料部分
+
+                                    //透過 intersectSchema 來查
+
+                                    dt_data = DBManager.ConnDB(ConnString, SQLManager.Select.GetTableData(tableName));
+
+                                    string where = "";
+
+                                    bool CheckData = false;
+
+                                    while ((line = sr.ReadLine()) != null)
+                                    {
+                                        CheckData = true;
+
+                                        foreach (var colName in intersectSchema)
+                                        {
+                                            var targetSchrma = oldSchema_List.Single(o => o.COLUMN_NAME == colName);
+
+                                            var datetimeFormat = targetSchrma.DATA_TYPE == "datetime" ? true : false;
+
+                                            if (line.StartsWith(colName))
+                                            {
+                                                string value = line.Remove(0, (colName + ":").Length);
+
+                                                if (!string.IsNullOrEmpty(value) && !datetimeFormat)
+                                                {
+                                                    if (string.IsNullOrEmpty(where))
+                                                    {
+                                                        where = colName + "=" + value;
+                                                    }
+                                                    else
+                                                    {
+                                                        where += " and " + colName + "=" + "'" + value + "'";
+                                                    }
+                                                }
+                                            }
+
+                                            line = sr.ReadLine();
+
+                                            if (string.IsNullOrEmpty(line))
+                                            {
+                                                continue;
+                                            }
+                                        }
+
+                                        DataRow[] dr = dt_data.Select(where);
+
+                                        if (dr.Length > 1)
+                                        {
+                                            sw.WriteLine("使用下列條件查到兩筆相同資料：" + where);
+                                        }
+
+                                        if (dr == null || dr.Length == 0)
+                                        {
+                                            sw.WriteLine("資料已被刪除或修改：" + where);
+                                        }
+
+                                        foreach (var o in dr)
+                                        {
+                                            dt_data.Rows.Remove(o);
+                                        }
+
+                                        where = "";
+                                    }
+
+                                    if (CheckData)
+                                    {
+                                        for (int j = 0; j < dt_data.Rows.Count; j++)
+                                        {
+                                            sw.WriteLine("以下資料可能為新增資料或修改資料：");
+
+                                            for (int k = 0; k < dt_data.Columns.Count; k++)
+                                            {
+                                                string columnName = dt_data.Columns[k].ColumnName;
+
+                                                sw.WriteLine(string.Format("{0}:{1}", columnName, dt_data.Rows[j][k].ToString()));
+                                            }
+
+                                            sw.WriteLine();
                                         }
                                     }
 
