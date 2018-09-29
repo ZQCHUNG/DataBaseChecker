@@ -28,10 +28,6 @@ namespace DataBaseChecker
 
         DataTable dt_TableName = new DataTable();
 
-        DataTable dt_TableSchema = new DataTable();
-
-        DataTable dt_TablePK = new DataTable();
-
         public Form1()
         {
             InitializeComponent();
@@ -142,27 +138,52 @@ namespace DataBaseChecker
                     Directory.CreateDirectory(CheckerDir);
                 }
 
-                //存放檔案
-                string savePath = Path.Combine(CheckerDir, DataBaseName + ".txt");
-
-                Logger.Info("savePath::" + savePath);
-
-                FileStream fileStream = new FileStream(savePath, FileMode.Create);
-
-                fileStream.Close();   //切記開了要關,不然會被佔用而無法修改喔!!!
-
-                Logger.Info("savePath::" + File.Exists(savePath));
-
                 for (int i = 0; i < dt_TableName.Rows.Count; i++)
                 {
-                    using (StreamWriter sw = new StreamWriter(savePath,true))
+                    DataTable dt_TablePK = new DataTable();
+
+                    DataTable dt_TableSchema = new DataTable();
+
+                    string tableName = dt_TableName.Rows[i]["TABLE_NAME"].ToString();
+
+                    //存放檔案
+                    string savePath = Path.Combine(CheckerDir, tableName + ".txt");
+
+                    FileStream fileStream = new FileStream(savePath, FileMode.Create);
+
+                    fileStream.Close();   //切記開了要關,不然會被佔用而無法修改喔!!!
+
+                    Logger.Info(string.Format("savePath::{0},{1}", savePath, File.Exists(savePath)));
+
+                    using (StreamWriter sw = new StreamWriter(savePath, true))
                     {
-                        string tableName = dt_TableName.Rows[i]["TABLE_NAME"].ToString();
+                        dt_TableSchema = DBManager.ConnDB(ConnString, SQLManager.Select.GetTableSchema(tableName));
 
-                        sw.WriteLine("Start:"+ tableName);
-                        
+                        sw.WriteLine("欄位數量::" + dt_TableSchema.Rows.Count);
 
-                        sw.WriteLine("End");
+                        dt_TablePK  = DBManager.ConnDB(ConnString, SQLManager.Select.GetTablePK(tableName));
+
+                        if (dt_TablePK.Rows.Count == 0)
+                        {
+                            sw.WriteLine(string.Format("Key:{0}", "null"));
+                        }
+                        else
+                        {
+                            for (int j = 0; j < dt_TablePK.Rows.Count; j++)
+                            {
+                                sw.WriteLine(string.Format("Key:{0}", dt_TablePK.Rows[j]["COLUMN_NAME"].ToString()));
+                            }
+                        }
+
+                        for (int j = 0; j < dt_TableSchema.Rows.Count; j++)
+                        {
+                            for (int k = 0; k < dt_TableSchema.Columns.Count; k++)
+                            {
+                                string columnName = dt_TableSchema.Columns[k].ColumnName;
+
+                                sw.WriteLine(string.Format("{0}:{1}", columnName, dt_TableSchema.Rows[j][k].ToString()));
+                            }
+                        }
                     }
                 }
             }
