@@ -123,10 +123,12 @@ namespace DataBaseChecker
                 //存放目錄
                 string recordDir = RecorderDir + DataBaseName + "/" + DateTime.Now.Date.ToString("yyyy/MM/dd");
 
-                if (!Directory.Exists(recordDir))
+                if (Directory.Exists(recordDir))
                 {
-                    Directory.CreateDirectory(recordDir);
+                    Directory.Delete(recordDir, true);
                 }
+
+                Directory.CreateDirectory(recordDir);
 
                 for (int i = 0; i < dt_TableName.Rows.Count; i++)
                 {
@@ -340,7 +342,7 @@ namespace DataBaseChecker
 
                             foreach (var item in diff_delete_list)
                             {
-                                sw.WriteLine("找不到Table:" + item);
+                                sw.WriteLine("已刪除或變更Table:" + item);
                             }
 
                             var diff_add_list = currentTableName.Except(oldTableName);
@@ -358,20 +360,156 @@ namespace DataBaseChecker
 
                             //比對資料是否一致
 
-                            foreach (var item in intersect_tablename)
+                            foreach (var tableName in intersect_tablename)
                             {
-                                using (StreamReader sr = new StreamReader(Path.Combine(RecorderDir, item + ".txt")))
+                                DataTable dt_TablePK = new DataTable();
+
+                                DataTable dt_TableSchema = new DataTable();
+
+                                DataTable dt_data = new DataTable();
+
+
+                                using (StreamReader sr = new StreamReader(Path.Combine(RecorderDir, tableName + ".txt")))
                                 {
+                                    sw.WriteLine();
+
+                                    sw.WriteLine("開始處理:" + tableName);
+
+                                    #region PK部分
+
+                                    dt_TablePK = DBManager.ConnDB(ConnString, SQLManager.Select.GetTablePK(tableName));
+
+                                    List<string> currentPK = new List<string>();
+
+                                    for (int j = 0; j < dt_TablePK.Rows.Count; j++)
+                                    {
+                                        currentPK.Add(dt_TablePK.Rows[j]["COLUMN_NAME"].ToString());
+                                    }
+
                                     string line = "";
+
+                                    List<string> old_key_list = new List<string>();
 
                                     while ((line = sr.ReadLine()) != null)
                                     {
+                                        if (line == "TableKey:")
+                                        {
+                                            continue;
+                                        }
 
                                         if (line == "TableSchema:")
                                         {
                                             break;
                                         }
+
+                                        old_key_list.Add(line);
                                     }
+
+                                    foreach (var item in old_key_list.Except(currentPK))
+                                    {
+                                        sw.WriteLine("已刪除PK:" + item);
+                                    }
+
+                                    foreach (var item in currentPK.Except(old_key_list))
+                                    {
+                                        sw.WriteLine("已新增PK:" + item);
+                                    }
+
+                                    #endregion
+
+                                    #region Scahema部分
+
+                                    dt_TableSchema = DBManager.ConnDB(ConnString, SQLManager.Select.GetTableSchema(tableName));
+
+                                    List<string> currentScahema = new List<string>();
+
+                                    for (int j = 0; j < dt_TableSchema.Rows.Count; j++)
+                                    {
+                                        currentScahema.Add(dt_TableSchema.Rows[j]["COLUMN_NAME"].ToString());
+                                    }
+
+                                    List<DataBaseSchema> oldSchema_List = new List<DataBaseSchema>();
+
+                                    //當Key查詢用
+                                    List<string> oldSchema_SearchKey = new List<string>();
+
+                                    while ((line = sr.ReadLine()) != null)
+                                    {
+                                        if (line == "==冷資料記錄，請買錸德(2349)==")
+                                        {
+                                            break;
+                                        }
+
+                                        if (line.StartsWith("COLUMN_NAME:"))
+                                        {
+                                            DataBaseSchema oldSchemaItem = new DataBaseSchema();
+
+                                            line = line.Remove(0, "COLUMN_NAME:".Length);
+
+                                            oldSchemaItem.COLUMN_NAME = line;
+
+                                            oldSchema_SearchKey.Add(line);
+
+                                            line = sr.ReadLine();
+
+                                            line = line.Remove(0, "ORDINAL_POSITION:".Length);
+
+                                            oldSchemaItem.ORDINAL_POSITION = line;
+
+                                            line = sr.ReadLine();
+
+                                            line = line.Remove(0, "DATA_TYPE:".Length);
+
+                                            oldSchemaItem.DATA_TYPE = line;
+
+                                            line = sr.ReadLine();
+
+                                            line = line.Remove(0, "CHARACTER_MAXIMUM_LENGTH:".Length);
+
+                                            oldSchemaItem.CHARACTER_MAXIMUM_LENGTH = line;
+
+                                            oldSchema_List.Add(oldSchemaItem);
+                                        }
+                                    }
+
+                                    foreach (var item in oldSchema_SearchKey.Except(currentScahema))
+                                    {
+                                        sw.WriteLine("已刪除Schema:" + item);
+                                    }
+
+                                    foreach (var item in currentScahema.Except(oldSchema_SearchKey))
+                                    {
+                                        sw.WriteLine("已新增Schema:" + item);
+                                    }
+
+                                    var intersectSchema = currentScahema.Intersect(oldSchema_SearchKey);
+
+                                    for (int j = 0; j < dt_TableSchema.Rows.Count; j++)
+                                    {
+                                        if (intersectSchema.Contains(dt_TableSchema.Rows[j]["COLUMN_NAME"]))
+                                        {
+                                            sw.WriteLine("檢查Schema:" + dt_TableSchema.Rows[j]["COLUMN_NAME"]);
+
+                                            var targetSchrma = oldSchema_List.Single(o => o.COLUMN_NAME == dt_TableSchema.Rows[j]["COLUMN_NAME"].ToString());
+
+                                            if (targetSchrma.DATA_TYPE != dt_TableSchema.Rows[j]["DATA_TYPE"].ToString())
+                                            {
+                                                sw.WriteLine("DATA_TYPE已變更::" + targetSchrma.DATA_TYPE + "==>" + dt_TableSchema.Rows[j]["DATA_TYPE"].ToString());
+                                            }
+
+                                            if (targetSchrma.ORDINAL_POSITION != dt_TableSchema.Rows[j]["ORDINAL_POSITION"].ToString())
+                                            {
+                                                sw.WriteLine("ORDINAL_POSITION已變更::" + targetSchrma.ORDINAL_POSITION + "==>" + dt_TableSchema.Rows[j]["ORDINAL_POSITION"].ToString());
+                                            }
+
+                                            if (targetSchrma.CHARACTER_MAXIMUM_LENGTH != dt_TableSchema.Rows[j]["CHARACTER_MAXIMUM_LENGTH"].ToString())
+                                            {
+                                                sw.WriteLine("CHARACTER_MAXIMUM_LENGTH已變更::" + targetSchrma.CHARACTER_MAXIMUM_LENGTH + "==>" + dt_TableSchema.Rows[j]["CHARACTER_MAXIMUM_LENGTH"].ToString());
+                                            }
+                                        }
+                                    }
+
+                                    #endregion
                                 }
                             }
                         }
@@ -387,6 +525,14 @@ namespace DataBaseChecker
 
                 label6.Text = "失敗";
             }
+        }
+
+        class DataBaseSchema
+        {
+            public string COLUMN_NAME { get; set; }
+            public string ORDINAL_POSITION { get; set; }
+            public string DATA_TYPE { get; set; }
+            public string CHARACTER_MAXIMUM_LENGTH { get; set; }
         }
 
         #endregion
