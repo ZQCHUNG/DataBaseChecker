@@ -26,6 +26,10 @@ namespace DataBaseChecker
 
         string DataBaseName { get; set; } // 當檔名
 
+        string CheckerDir = "Checker/";
+
+        string RecorderDir = "Recorder/";
+
         DataTable dt_TableName = new DataTable();
 
         public Form1()
@@ -42,28 +46,56 @@ namespace DataBaseChecker
 
         private void BtnCompare_Click(object sender, EventArgs e)
         {
-            GetCompareDataBaseInfo();
+            //GetCompareDataBaseInfo();
+
+            GetComparisonDir();
+        }
+
+        //取得目錄檔案
+        private void GetComparisonDir()
+        {
+            try
+            {
+                chkListDir.Items.Clear();
+
+                string[] dirs = Directory.GetDirectories(CheckerDir);
+
+                Logger.Info("dirs.length::" + dirs.Length);
+
+                for (int i = 0; i < dirs.Length; i++)
+                {
+                    string dirName = dirs[i].Replace(CheckerDir,"");
+
+                    chkListDir.Items.Add(dirName);
+                }
+            }
+            catch(Exception ex)
+            {
+                Logger.Error(System.Reflection.MethodBase.GetCurrentMethod().Name + ex.ToString());
+
+                MessageBox.Show(ex.Message);
+            }
         }
 
         //取得比對檔案
-        private void GetCompareDataBaseInfo()
-        {
-            OpenFileDialog comparedFile = new OpenFileDialog();
+        //private void GetCompareDataBaseInfo()
+        //{
+        //    OpenFileDialog comparedFile = new OpenFileDialog();
 
-            comparedFile.Filter = "txt files (*.txt)|*.txt";
-            comparedFile.Title = "請選擇比對檔";
+        //    comparedFile.Filter = "txt files (*.txt)|*.txt";
+        //    comparedFile.Title = "請選擇比對檔";
 
-            if (comparedFile.ShowDialog() != DialogResult.OK)
-            {
-                return;
-            }
-            else
-            {
-                ComparedFilePath = comparedFile.FileName;
+        //    if (comparedFile.ShowDialog() != DialogResult.OK)
+        //    {
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        ComparedFilePath = comparedFile.FileName;
 
-                Logger.Info(string.Format("ComparedFilePath::{0}", ComparedFilePath));
-            }
-        }
+        //        Logger.Info(string.Format("ComparedFilePath::{0}", ComparedFilePath));
+        //    }
+        //}
 
         /// <summary>
         /// 
@@ -85,6 +117,8 @@ namespace DataBaseChecker
 
                 Logger.Info("Table.length::" + dt_TableName.Rows.Count);
 
+                chkListTableDataChecker.Items.Clear();
+
                 for (int i = 0; i < dt_TableName.Rows.Count; i++)
                 {
                     string tableName = dt_TableName.Rows[i]["TABLE_NAME"].ToString();
@@ -102,13 +136,23 @@ namespace DataBaseChecker
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
+            checkedALL(chkListTableDataChecker, checkBox1);
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            checkedALL(chkListDir, checkBox2);
+        }
+
+        private void checkedALL(CheckedListBox checkedListBox,CheckBox checkBox)
+        {
             try
             {
-                bool check = !checkBox1.Checked ? false : true;
+                bool check = !checkBox.Checked ? false : true;
 
-                for (int i = 0; i < chkListTableDataChecker.Items.Count; i++)
+                for (int i = 0; i < checkedListBox.Items.Count; i++)
                 {
-                    chkListTableDataChecker.SetItemChecked(i, check);
+                    checkedListBox.SetItemChecked(i, check);
                 }
             }
             catch (Exception ex)
@@ -130,12 +174,31 @@ namespace DataBaseChecker
             {
                 DataBaseName = string.IsNullOrEmpty(txtDatabaseName.Text) ? DateTime.Now.Date.ToString() + "DB" : txtDatabaseName.Text;
 
-                //存放目錄
-                string CheckerDir = "Checker/" + DataBaseName + "/" + DateTime.Now.Date.ToString("yyyy/MM/dd");
+                //建立檢查目錄
+                string checkerDir = CheckerDir + DataBaseName;
 
-                if (!Directory.Exists(CheckerDir))
+                string connStringInfoPath = Path.Combine(checkerDir, "ConnectionInfo.txt");
+
+                if (!Directory.Exists(checkerDir))
                 {
-                    Directory.CreateDirectory(CheckerDir);
+                    Directory.CreateDirectory(checkerDir);
+                }
+
+                FileStream fileStreamConnectionInfo = new FileStream(connStringInfoPath, FileMode.Create);
+
+                fileStreamConnectionInfo.Close(); 
+
+                using (StreamWriter sw = new StreamWriter(connStringInfoPath))
+                {
+                    sw.WriteLine(ConnString);
+                }
+
+                //存放目錄
+                string recordDir = RecorderDir + DataBaseName + "/" + DateTime.Now.Date.ToString("yyyy/MM/dd");
+
+                if (!Directory.Exists(recordDir))
+                {
+                    Directory.CreateDirectory(recordDir);
                 }
 
                 for (int i = 0; i < dt_TableName.Rows.Count; i++)
@@ -149,7 +212,7 @@ namespace DataBaseChecker
                     string tableName = dt_TableName.Rows[i]["TABLE_NAME"].ToString();
 
                     //存放檔案
-                    string savePath = Path.Combine(CheckerDir, tableName + ".txt");
+                    string savePath = Path.Combine(recordDir, tableName + ".txt");
 
                     FileStream fileStream = new FileStream(savePath, FileMode.Create);
 
@@ -192,7 +255,7 @@ namespace DataBaseChecker
                         //若要記錄資料
                         if (chkListTableDataChecker.GetItemChecked(i))
                         {
-                            sw.WriteLine("==Data==");
+                            sw.WriteLine("==冷資料記錄，請買錸德(2349)==");
 
                             dt_data = DBManager.ConnDB(ConnString, SQLManager.Select.GetTableData(tableName));
 
@@ -218,5 +281,7 @@ namespace DataBaseChecker
                 MessageBox.Show(ex.Message);
             }
         }
+
+    
     }
 }

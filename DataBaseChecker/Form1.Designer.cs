@@ -29,21 +29,27 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtDatabaseName = new System.Windows.Forms.TextBox();
+            this.btnRecordTablenfo = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.chkListTableDataChecker = new System.Windows.Forms.CheckedListBox();
             this.btnConnectDataBase = new System.Windows.Forms.Button();
             this.txtConnString = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.BtnCompare = new System.Windows.Forms.Button();
-            this.chkListTableDataChecker = new System.Windows.Forms.CheckedListBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.btnRecordTablenfo = new System.Windows.Forms.Button();
-            this.txtDatabaseName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.chkListDir = new System.Windows.Forms.CheckedListBox();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.txtDatabaseName);
             this.panel1.Controls.Add(this.btnRecordTablenfo);
@@ -55,8 +61,63 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1403, 570);
+            this.panel1.Size = new System.Drawing.Size(1250, 315);
             this.panel1.TabIndex = 0;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(153, 292);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(101, 12);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "產生的檔案名稱：";
+            // 
+            // txtDatabaseName
+            // 
+            this.txtDatabaseName.Location = new System.Drawing.Point(260, 287);
+            this.txtDatabaseName.Name = "txtDatabaseName";
+            this.txtDatabaseName.Size = new System.Drawing.Size(100, 22);
+            this.txtDatabaseName.TabIndex = 9;
+            this.txtDatabaseName.Text = "CathayDimsDB";
+            // 
+            // btnRecordTablenfo
+            // 
+            this.btnRecordTablenfo.Location = new System.Drawing.Point(14, 287);
+            this.btnRecordTablenfo.Name = "btnRecordTablenfo";
+            this.btnRecordTablenfo.Size = new System.Drawing.Size(118, 23);
+            this.btnRecordTablenfo.TabIndex = 8;
+            this.btnRecordTablenfo.Text = "記錄資訊";
+            this.btnRecordTablenfo.UseVisualStyleBackColor = true;
+            this.btnRecordTablenfo.Click += new System.EventHandler(this.btnRecordTableInfo_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(13, 57);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(149, 12);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "打勾資料也須控管的資料表";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(168, 35);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(93, 16);
+            this.checkBox1.TabIndex = 6;
+            this.checkBox1.Text = "全選 / 都不選";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // chkListTableDataChecker
+            // 
+            this.chkListTableDataChecker.FormattingEnabled = true;
+            this.chkListTableDataChecker.Location = new System.Drawing.Point(168, 57);
+            this.chkListTableDataChecker.Name = "chkListTableDataChecker";
+            this.chkListTableDataChecker.Size = new System.Drawing.Size(485, 225);
+            this.chkListTableDataChecker.TabIndex = 4;
             // 
             // btnConnectDataBase
             // 
@@ -88,81 +149,68 @@
             // 
             // BtnCompare
             // 
-            this.BtnCompare.Location = new System.Drawing.Point(2, 588);
+            this.BtnCompare.Location = new System.Drawing.Point(13, 3);
             this.BtnCompare.Name = "BtnCompare";
-            this.BtnCompare.Size = new System.Drawing.Size(75, 23);
+            this.BtnCompare.Size = new System.Drawing.Size(104, 23);
             this.BtnCompare.TabIndex = 2;
-            this.BtnCompare.Text = "比對";
+            this.BtnCompare.Text = "選擇比對目錄";
             this.BtnCompare.UseVisualStyleBackColor = true;
             this.BtnCompare.Click += new System.EventHandler(this.BtnCompare_Click);
             // 
-            // chkListTableDataChecker
+            // panel2
             // 
-            this.chkListTableDataChecker.FormattingEnabled = true;
-            this.chkListTableDataChecker.Location = new System.Drawing.Point(14, 109);
-            this.chkListTableDataChecker.Name = "chkListTableDataChecker";
-            this.chkListTableDataChecker.Size = new System.Drawing.Size(1220, 225);
-            this.chkListTableDataChecker.TabIndex = 4;
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.checkBox2);
+            this.panel2.Controls.Add(this.label4);
+            this.panel2.Controls.Add(this.chkListDir);
+            this.panel2.Controls.Add(this.BtnCompare);
+            this.panel2.Location = new System.Drawing.Point(13, 333);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(1249, 273);
+            this.panel2.TabIndex = 3;
             // 
-            // checkBox1
+            // checkBox2
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(17, 84);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(93, 16);
-            this.checkBox1.TabIndex = 6;
-            this.checkBox1.Text = "全選 / 都不選";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(119, 7);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(93, 16);
+            this.checkBox2.TabIndex = 9;
+            this.checkBox2.Text = "全選 / 都不選";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
-            // label2
+            // label4
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 69);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(149, 12);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "打勾資料也須控管的資料表";
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 29);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(101, 12);
+            this.label4.TabIndex = 8;
+            this.label4.Text = "打勾要比對的目錄";
             // 
-            // btnRecordTablenfo
+            // chkListDir
             // 
-            this.btnRecordTablenfo.Location = new System.Drawing.Point(14, 340);
-            this.btnRecordTablenfo.Name = "btnRecordTablenfo";
-            this.btnRecordTablenfo.Size = new System.Drawing.Size(118, 23);
-            this.btnRecordTablenfo.TabIndex = 8;
-            this.btnRecordTablenfo.Text = "記錄資訊";
-            this.btnRecordTablenfo.UseVisualStyleBackColor = true;
-            this.btnRecordTablenfo.Click += new System.EventHandler(this.btnRecordTableInfo_Click);
-            // 
-            // txtDatabaseName
-            // 
-            this.txtDatabaseName.Location = new System.Drawing.Point(260, 340);
-            this.txtDatabaseName.Name = "txtDatabaseName";
-            this.txtDatabaseName.Size = new System.Drawing.Size(100, 22);
-            this.txtDatabaseName.TabIndex = 9;
-            this.txtDatabaseName.Text = "CathayDimsDB";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(153, 345);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(101, 12);
-            this.label3.TabIndex = 10;
-            this.label3.Text = "產生的檔案名稱：";
+            this.chkListDir.FormattingEnabled = true;
+            this.chkListDir.Location = new System.Drawing.Point(119, 29);
+            this.chkListDir.Name = "chkListDir";
+            this.chkListDir.Size = new System.Drawing.Size(391, 157);
+            this.chkListDir.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1427, 623);
+            this.ClientSize = new System.Drawing.Size(1274, 618);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.BtnCompare);
             this.Name = "Form1";
             this.Text = "DataBaseChecker";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -180,6 +228,10 @@
         private System.Windows.Forms.Button btnRecordTablenfo;
         private System.Windows.Forms.TextBox txtDatabaseName;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.CheckedListBox chkListDir;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox checkBox2;
     }
 }
 
