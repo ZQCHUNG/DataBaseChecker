@@ -43,6 +43,9 @@
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.chkListDir = new System.Windows.Forms.CheckedListBox();
+            this.btnCompared = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -50,6 +53,7 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.txtDatabaseName);
             this.panel1.Controls.Add(this.btnRecordTablenfo);
@@ -155,11 +159,13 @@
             this.BtnCompare.TabIndex = 2;
             this.BtnCompare.Text = "選擇比對目錄";
             this.BtnCompare.UseVisualStyleBackColor = true;
-            this.BtnCompare.Click += new System.EventHandler(this.BtnCompare_Click);
+            this.BtnCompare.Click += new System.EventHandler(this.BtnGetCompareDir_Click);
             // 
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.label6);
+            this.panel2.Controls.Add(this.btnCompared);
             this.panel2.Controls.Add(this.checkBox2);
             this.panel2.Controls.Add(this.label4);
             this.panel2.Controls.Add(this.chkListDir);
@@ -197,6 +203,34 @@
             this.chkListDir.Size = new System.Drawing.Size(391, 157);
             this.chkListDir.TabIndex = 3;
             // 
+            // btnCompared
+            // 
+            this.btnCompared.Location = new System.Drawing.Point(119, 193);
+            this.btnCompared.Name = "btnCompared";
+            this.btnCompared.Size = new System.Drawing.Size(75, 23);
+            this.btnCompared.TabIndex = 10;
+            this.btnCompared.Text = "比對";
+            this.btnCompared.UseVisualStyleBackColor = true;
+            this.btnCompared.Click += new System.EventHandler(this.btnCompared_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(366, 298);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(59, 12);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "_________";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(200, 204);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(59, 12);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "_________";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -232,6 +266,9 @@
         private System.Windows.Forms.CheckedListBox chkListDir;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.Button btnCompared;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 
